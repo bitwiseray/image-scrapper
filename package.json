@@ -1,14 +1,14 @@
 {
-  "name": "hentai-scrapper",
+  "name": "image-scrapper",
   "version": "2.0.0",
   "description": "A simple reddit image scrapper",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["scrapper"],
+  "author": "Ray",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.1.3"
   }
