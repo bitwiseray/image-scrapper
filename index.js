@@ -86,7 +86,6 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
 
   let promises = [];
   let mediaFound = false;
-
   for (let index = 0; index < resBody.data.data.children.length; index++) {
     if (resBody.data.data.children[index].data.post_hint == fnFormat) {
       let url = resBody.data.data.children[index].data.url_overridden_by_dest;
@@ -107,19 +106,6 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
   }).catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
   });
-}
-
-async function saveAfter(aftersString, page) {
-  let obj = {};
-  try {
-    const existingData = fs.readFileSync('afters.json', 'utf-8');
-    obj = JSON.parse(existingData);
-  } catch (err) {
-    console.error(err);
-  }
-  obj[page] = aftersString;
-  let formObj = JSON.stringify(obj, null, 2);
-  fs.writeFileSync('afters.json', formObj);
 }
 
 async function appendValues(values, page) {
