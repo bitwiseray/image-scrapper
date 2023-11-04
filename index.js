@@ -3,7 +3,6 @@ const axios = require('axios');
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
-const wait = require('node:timers/promises').setTimeout;
 let jsonAfters = require('./afters.json')
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
@@ -105,19 +104,5 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
     console.log(`[+] Downloaded total of ${results.length} media files from ${fnPage}`);
   }).catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
-  });
-}
-
-async function appendValues(values, page) {
-  fs.readFile('url_logs.json', 'utf-8', (error, data) => {
-    if (error) return console.log('\x1b[31m%s\x1b[0m', error);
-    try {
-      const jsonData = JSON.parse(data);
-      if (!jsonData[page]) jsonData[page] = [];
-      jsonData[page] = jsonData[page].concat(values);
-      fs.writeFileSync('url_logs.json', JSON.stringify(jsonData, null, 2), 'utf-8');
-    } catch (parseError) {
-      console.log('\x1b[31m%s\x1b[0m', `[!] Error parsing JSON ${parseError}`);
-    }
   });
 }
