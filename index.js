@@ -11,8 +11,9 @@ const userQueue = {
   page: null,
   limit: NaN,
   sort: null,
+  format: null,
   fallback: [
-    { page: 'ecchi', limit: 20, sort: 'sort=top?t=all' }
+    { page: 'ecchi', limit: 20, sort: 'sort=top?t=all', format: 'image' }
   ]
 };
 
@@ -32,20 +33,23 @@ rl.question('Enter subreddit page name (i.e: cats): ', (answerPg) => {
       default:
         userQueue.sort = userQueue.fallback[0].sort;
     }
-    rl.question('Enter limit (default is 20): ', (answerLt) => {
-      userQueue.limit = answerLt || 25;
-      if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
-        sync(userQueue.page, userQueue.sort, userQueue.limit);
-      } else {
-        console.log('Invalid input or missing page, default fallback configuration will be used.');
-        sync();
-      }
-      rl.close();
+    rl.question('Enter media format (image, video, gif): ', (answerSt) => {
+      userQueue.format = answerSt.toLowerCase();
+      rl.question('Enter limit (default is 20): ', (answerLt) => {
+        userQueue.limit = answerLt || 25;
+        if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
+          sync(userQueue.page, userQueue.sort, userQueue.limit);
+        } else {
+          console.log('Invalid input or missing page, default fallback configuration will be used.');
+          sync();
+        }
+        rl.close();
+      });
     });
   });
 });
 
-async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit) {
+async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit, fnFormat = userQueue.fallback[0].format) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
@@ -68,7 +72,7 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
       execFile('curl', args, (err, stdout, stderr) => {
         if (stderr) {
           console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${limit}]`);
-          appendValues(url);
+          appendValues(urls, fnPage);
         }
         if (err) {
           console.log(`[!] ${err}`);
@@ -84,7 +88,7 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
   let mediaFound = false;
 
   for (let index = 0; index < resBody.data.data.children.length; index++) {
-    if (resBody.data.data.children[index].data.post_hint == 'image') {
+    if (resBody.data.data.children[index].data.post_hint == fnFormat) {
       let url = resBody.data.data.children[index].data.url_overridden_by_dest;
       let name = path.basename(url);
       const file = path.join(__dirname, 'output', fnPage, name);
@@ -118,13 +122,13 @@ async function saveAfter(aftersString, page) {
   fs.writeFileSync('afters.json', formObj);
 }
 
-async function appendValues(values) {
+async function appendValues(values, page) {
   fs.readFile('url_logs.json', 'utf-8', (error, data) => {
     if (error) return console.log('\x1b[31m%s\x1b[0m', error);
     try {
       const jsonData = JSON.parse(data);
-      if (!jsonData['urls']) jsonData['urls'] = [];
-      jsonData['urls'] = jsonData['urls'].concat(values);
+      if (!jsonData[page]) jsonData[page] = [];
+      jsonData[page] = jsonData[page].concat(values);
       fs.writeFileSync('url_logs.json', JSON.stringify(jsonData, null, 2), 'utf-8');
     } catch (parseError) {
       console.log('\x1b[31m%s\x1b[0m', `[!] Error parsing JSON ${parseError}`);
