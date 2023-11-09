@@ -2,13 +2,12 @@ const { execFile } = require('child_process');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const jsonAfters = require('./afters.json');
 const { checkFilesExistence } = require('./handlers/checkAssets.js');
 const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 const { appendValues } = require('./handlers/createLogs.js');
 const { saveAfter } = require('./handlers/saveAfters.js');
 
-
+const jsonAfters = require('./afters.json');
 async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;

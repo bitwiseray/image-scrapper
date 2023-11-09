@@ -29,36 +29,38 @@ function ask(question) {
   });
 }
 
-async function startWithConfig() {
-  try {
-    userQueue.page = await ask('Enter subreddit page name (i.e: cats): ');
-    let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
-    switch (sortCache.toLowerCase()) {
-      case 'top':
-        userQueue.sort = 'sort=top?t=all';
-        break;
-      case 'hot':
-      case 'new':
-      case 'rising':
-      case 'controversial':
-        userQueue.sort = `sort=${userQueue.sort.toLowerCase()}`;
-        break;
-      default:
-        userQueue.sort = userQueue.fallback[0].sort;
+function startWithConfig() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      userQueue.page = await ask('Enter subreddit page name (i.e: cats): ');
+      let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
+      switch (sortCache.toLowerCase()) {
+        case 'top':
+          userQueue.sort = 'sort=top?t=all';
+          break;
+        case 'hot':
+        case 'new':
+        case 'rising':
+        case 'controversial':
+          userQueue.sort = `sort=${userQueue.sort.toLowerCase()}`;
+          break;
+        default:
+          userQueue.sort = userQueue.fallback[0].sort;
+      }
+      userQueue.format = await ask('Enter media format (image, video, gif): ');
+      userQueue.limit = await ask('Enter limit (default is 20): ');
+      if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
+        resolve({ check: true, mode: 'config', error: null });
+      } else {
+        console.log('Invalid input or missing page, default fallback configuration will be used.');
+        resolve({ check: true, mode: 'default', error: null });
+      }
+      rl.close();
+    } catch (error) {
+      console.error(error);
+      reject({ check: false, mode: 'default', error: error });
     }
-    userQueue.format = await ask('Enter media format (image, video, gif): ');
-    userQueue.limit = await ask('Enter limit (default is 20): ');
-    if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
-      return { check: true, mode: 'config', error: null };
-    } else {
-      console.log('Invalid input or missing page, default fallback configuration will be used.');
-      return { check: true, mode: 'default', error: null };
-    }
-    rl.close();
-  } catch (error) {
-    console.error(error);
-    return { check: false, mode: 'default', error: error };
-  }
+  });
 }
 
 module.exports = { startWithConfig, userQueue };
