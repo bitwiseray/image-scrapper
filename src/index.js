@@ -7,6 +7,14 @@ const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 const { appendValues } = require('./handlers/createLogs.js');
 const { saveAfter } = require('./handlers/saveAfters.js');
 
+checkFilesExistence()
+  .then(() => startWithConfig())
+  .then((result) => sync(...Object.values(userQueue)))
+  .catch((error) => {
+    console.log('\x1b[31m%s\x1b[0m', error.message);
+    process.exit(1);
+  });
+
 const jsonAfters = require('./afters.json');
 async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
