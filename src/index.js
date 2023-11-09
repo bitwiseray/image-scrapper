@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const jsonAfters = require('./afters.json');
 const { startWithConfig, userQueue } = require('./handlers/userPref.js');
+const { appendValues } = require('./handlers/createLogs.js');
+const { saveAfter } = require('./handlers/saveAfters.js');
 
 if (!checkFilesExistence().check) return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to check system files.');
 if (startWithConfig().check) {
