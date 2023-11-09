@@ -6,8 +6,13 @@ const jsonAfters = require('./afters.json');
 const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 
 if (!checkFilesExistence().check) return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to check system files.');
+if (startWithConfig().check) {
+  sync(...Object.values(userQueue));
+} else {
+  return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to start sync.');
+}
 
-async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit, fnFormat = userQueue.fallback[0].format) {
+async function sync(fnPage, fnSort, limit, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
@@ -30,7 +35,7 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
       execFile('curl', args, (err, stdout, stderr) => {
         if (stderr) {
           console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${limit}]`);
-          appendValues(urls, fnPage);
+          urls.push(url)
         }
         if (err) {
           console.log(`[!] ${err}`);
@@ -58,9 +63,10 @@ async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fall
       mediaFound = true;
     }
   }
-  if (!mediaFound) return console.log('\x1b[31m%s\x1b[0m', '[!] No media format found in the provided subreddit link, cause may be that the provided subreddit is a text-only.');
+  if (!mediaFound) return console.log('\x1b[31m%s\x1b[0m', '[•] No media format found in the provided subreddit link, cause may be that the provided subreddit is a text-only.');
   Promise.all(promises).then((results) => {
     console.log(`[+] Downloaded total of ${results.length} media files from ${fnPage}`);
+    appendValues(urls, fnPage);
   }).catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
   });

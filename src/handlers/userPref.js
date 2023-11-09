@@ -1,15 +1,28 @@
 const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
+const fallback = { 
+  page: 'ecchi', 
+  limit: 20, 
+  sort: 'sort=top?t=all', 
+  format: 'image' 
+};
+
 const userQueue = {
   page: null,
   limit: NaN,
   sort: null,
-  format: null,
-  fallback: [
-    { page: 'ecchi', limit: 20, sort: 'sort=top?t=all', format: 'image' }
-  ]
+  format: null
 };
+
+// Loop through the key-value pairs of userQueue
+for (let [key, value] of Object.entries(userQueue)) {
+  // Check if the value is empty
+  if (value == null || value === "" || Number.isNaN(value)) {
+    // Assign the default value from the fallback
+    userQueue[key] = fallback[key];
+  }
+}
 
 function ask(question) {
   return new Promise((resolve, reject) => {
