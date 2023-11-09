@@ -12,7 +12,7 @@ if (startWithConfig().check) {
   return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to start sync.');
 }
 
-async function sync(fnPage, fnSort, limit, fnFormat) {
+async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
@@ -34,11 +34,11 @@ async function sync(fnPage, fnSort, limit, fnFormat) {
       const args = ['-o', file, url];
       execFile('curl', args, (err, stdout, stderr) => {
         if (stderr) {
-          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${limit}]`);
+          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${fnLimit}]`);
           urls.push(url)
         }
         if (err) {
-          console.log(`[!] ${err}`);
+          console.log('\x1b[31m%s\x1b[0m', error);
           reject(err);
         } else {
           resolve(filename);
@@ -55,7 +55,7 @@ async function sync(fnPage, fnSort, limit, fnFormat) {
       let name = path.basename(url);
       const file = path.join(__dirname, 'output', fnPage, name);
       if (!fs.existsSync(file)) {
-        if (count < limit) {
+        if (count < fnLimit) {
           promises.push(downloadImage(url, name));
           count++;
         }
