@@ -1,3 +1,16 @@
+const readline = require('readline');
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+const userQueue = {
+  page: null,
+  limit: NaN,
+  sort: null,
+  format: null,
+  fallback: [
+    { page: 'ecchi', limit: 20, sort: 'sort=top?t=all', format: 'image' }
+  ]
+};
+
 function ask(question) {
   return new Promise((resolve, reject) => {
     rl.question(question, (answer) => {
@@ -38,4 +51,4 @@ async function startWithConfig() {
   }
 }
 
-module.exports = { startWithConfig };
+module.exports = { startWithConfig, userQueue };

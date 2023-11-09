@@ -1,21 +1,9 @@
 const { execFile } = require('child_process');
 const axios = require('axios');
 const fs = require('fs');
-const readline = require('readline');
 const path = require('path');
 const jsonAfters = require('./afters.json');
-const { checkFilesExistence } = require('./handlers/checkAssets.js');
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-
-const userQueue = {
-  page: null,
-  limit: NaN,
-  sort: null,
-  format: null,
-  fallback: [
-    { page: 'ecchi', limit: 20, sort: 'sort=top?t=all', format: 'image' }
-  ]
-};
+const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 
 async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit, fnFormat = userQueue.fallback[0].format) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
