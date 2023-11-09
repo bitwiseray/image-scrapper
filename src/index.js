@@ -3,7 +3,8 @@ const axios = require('axios');
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
-let jsonAfters = require('./afters.json')
+const jsonAfters = require('./afters.json');
+const { checkFilesExistence } = require('./handlers/checkAssets.js');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 const userQueue = {

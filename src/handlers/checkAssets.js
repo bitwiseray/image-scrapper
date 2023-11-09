@@ -16,6 +16,7 @@ function checkFilesExistence() {
             fs.mkdirSync(item);
           }
           console.log('\x1b[33m%s\x1b[0m', `[!] New system files that were originally missing were created.`);
+          return true;
         }
       });
     }
