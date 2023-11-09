@@ -5,9 +5,10 @@ const path = require('path');
 const jsonAfters = require('./afters.json');
 const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 
+if (!checkFilesExistence().check) return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to check system files.');
+
 async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit, fnFormat = userQueue.fallback[0].format) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
-  if (!checkFilesExistence()) return;
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
   saveAfter(resBody.data.data.after, fnPage);
