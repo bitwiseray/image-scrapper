@@ -15,8 +15,9 @@ checkFilesExistence()
     process.exit(1);
   });
 
-const jsonAfters = require('./afters.json');
+
 async function sync(fnPage, fnSort, fnLimit, fnFormat) {
+  const jsonAfters = require('./afters.json');
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
