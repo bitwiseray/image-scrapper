@@ -1,4 +1,3 @@
-// A function that returns a promise that resolves with the user input
 function ask(question) {
   return new Promise((resolve, reject) => {
     rl.question(question, (answer) => {
@@ -7,8 +6,7 @@ function ask(question) {
   });
 }
 
-// An async function that gets the user preferences and calls sync
-async function getUserPreferences() {
+async function startWithConfig() {
   try {
     userQueue.page = await ask('Enter subreddit page name (i.e: cats): ');
     let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
@@ -28,15 +26,16 @@ async function getUserPreferences() {
     userQueue.format = await ask('Enter media format (image, video, gif): ');
     userQueue.limit = await ask('Enter limit (default is 20): ');
     if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
-      sync(userQueue.page, userQueue.sort, userQueue.limit);
+      return { check: true, mode: 'config', error: null };
     } else {
       console.log('Invalid input or missing page, default fallback configuration will be used.');
-      sync();
+      return { check: true, mode: 'default', error: null };
     }
     rl.close();
   } catch (error) {
     console.error(error);
+    return { check: false, mode: 'default', error: error };
   }
 }
 
-getUserPreferences();
+module.exports = { startWithConfig };
