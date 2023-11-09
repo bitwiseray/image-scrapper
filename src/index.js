@@ -17,40 +17,9 @@ const userQueue = {
   ]
 };
 
-rl.question('Enter subreddit page name (i.e: cats): ', (answerPg) => {
-  userQueue.page = answerPg;
-  rl.question('Enter sorting option (hot, new, top, etc.): ', (answerSt) => {
-    switch (answerSt.toLowerCase()) {
-      case 'top':
-        userQueue.sort = 'sort=top?t=all';
-        break;
-      case 'hot':
-      case 'new':
-      case 'rising':
-      case 'controversial':
-        userQueue.sort = `sort=${answerSt.toLowerCase()}`;
-        break;
-      default:
-        userQueue.sort = userQueue.fallback[0].sort;
-    }
-    rl.question('Enter media format (image, video, gif): ', (answerSt) => {
-      userQueue.format = answerSt.toLowerCase();
-      rl.question('Enter limit (default is 20): ', (answerLt) => {
-        userQueue.limit = answerLt || 25;
-        if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
-          sync(userQueue.page, userQueue.sort, userQueue.limit);
-        } else {
-          console.log('Invalid input or missing page, default fallback configuration will be used.');
-          sync();
-        }
-        rl.close();
-      });
-    });
-  });
-});
-
 async function sync(fnPage = userQueue.fallback[0].page, fnSort = userQueue.fallback[0].sort, limit = userQueue.fallback[0].limit, fnFormat = userQueue.fallback[0].format) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
+  if (!checkFilesExistence()) return;
   let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
   const resBody = await axios.get(getUrl);
   saveAfter(resBody.data.data.after, fnPage);
