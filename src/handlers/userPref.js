@@ -15,11 +15,8 @@ const userQueue = {
   format: null
 };
 
-// Loop through the key-value pairs of userQueue
 for (let [key, value] of Object.entries(userQueue)) {
-  // Check if the value is empty
   if (value == null || value === "" || Number.isNaN(value)) {
-    // Assign the default value from the fallback
     userQueue[key] = fallback[key];
   }
 }
