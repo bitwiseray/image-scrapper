@@ -3,16 +3,11 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const jsonAfters = require('./afters.json');
+const { checkFilesExistence } = require('./handlers/checkAssets.js');
 const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 const { appendValues } = require('./handlers/createLogs.js');
 const { saveAfter } = require('./handlers/saveAfters.js');
 
-if (!checkFilesExistence().check) return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to check system files.');
-if (startWithConfig().check) {
-  sync(...Object.values(userQueue));
-} else {
-  return console.log('\x1b[31m%s\x1b[0m', '[×] Something went wrong while trying to start sync.');
-}
 
 async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
