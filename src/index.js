@@ -24,8 +24,8 @@ checkFilesExistence()
 async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   console.log(...Object.values(userQueue))
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
-  let getUrl = jsonAfters[fnPage] ? `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}&after=${jsonAfters[fnPage]}` : `https://www.reddit.com/r/${fnPage}/top.json?${fnSort}`;
-  console.log(getUrl, [fnLimit, fnFormat])
+  let getUrl = userQueue.url;
+  console.log(userQueue.url, [fnLimit, fnFormat])
   const resBody = await axios.get(getUrl);
   saveAfter(resBody.data.data.after, fnPage);
   if (!fs.existsSync(path.join(__dirname, 'output', fnPage))) {
@@ -66,10 +66,8 @@ async function sync(fnPage, fnSort, fnLimit, fnFormat) {
       let name = path.basename(url);
       const file = path.join(__dirname, 'output', fnPage, name);
       if (!fs.existsSync(file)) {
-        if (count < 3) {
-          promises.push(download(url, name));
-          count++;
-        }
+        promises.push(download(url, name));
+        count++;
       }
       mediaFound = true;
     }

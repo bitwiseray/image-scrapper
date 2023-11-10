@@ -3,9 +3,9 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const jsonAfters = require('../afters.json');
 
 const fallback = {
-  page: 'ecchi',
-  limit: 20,
-  sort: 'sort=top?t=all',
+  page: 'cats',
+  limit: 10,
+  sort: 'top',
   format: 'image',
   link: 'https://www.reddit.com/r/cats/hot/.json?limit=10'
 };
@@ -15,7 +15,7 @@ const userQueue = {
   sort: null,
   limit: NaN,
   format: null,
-  link: null
+  url: null
 };
 
 for (let [key, value] of Object.entries(userQueue)) {
@@ -68,7 +68,7 @@ function startWithConfig() {
             }
             break;
         }
-        userQueue.link = link;
+        userQueue.url = link;
         resolve({ check: true, mode: 'config', error: null });
       } else {
         console.log('Invalid input or missing page, default fallback configuration will be used.');
