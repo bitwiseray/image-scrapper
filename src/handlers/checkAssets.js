@@ -8,7 +8,7 @@ function checkFilesExistence() {
       itemsToCheck.forEach(item => {
         if (!fs.existsSync(item)) {
           fs.writeFileSync(item, JSON.stringify({}));
-          console.log(`${item} created.`);
+          console.log('\x1b[33m%s\x1b[0m', `[!] Important files that were missing were recreated.`);
         }
       });
       resolve({ check: true, error: null });

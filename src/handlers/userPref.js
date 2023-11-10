@@ -1,6 +1,5 @@
 const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const jsonAfters = require('../afters.json');
 
 const fallback = {
   page: 'cats',
@@ -33,6 +32,7 @@ function ask(question) {
 }
 
 function startWithConfig() {
+  const jsonAfters = require('../afters.json');
   return new Promise(async (resolve, reject) => {
     try {
       userQueue.page = await ask('Enter subreddit page name (i.e: cats): ');
