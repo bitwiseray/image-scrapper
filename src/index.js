@@ -22,7 +22,6 @@ checkFilesExistence()
   });
 
 async function sync(fnPage, fnFormat) {
-  console.table(userQueue);
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = userQueue.url;
   const resBody = await axios.get(getUrl);
@@ -75,7 +74,6 @@ async function sync(fnPage, fnFormat) {
   Promise.all(promises).then((results) => {
     console.log(`[+] Downloaded total of ${results.length} media files from r/${fnPage}`);
     appendValues(urls, fnPage);
-    console.log(results)
   }).catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
   });
