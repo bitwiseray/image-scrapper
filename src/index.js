@@ -73,7 +73,7 @@ async function sync(fnPage, fnFormat) {
   if (!mediaFound) console.log('\x1b[31m%s\x1b[0m', '[•] No media format found in the provided subreddit link, cause may be that the provided subreddit is a text-only.');
   Promise.all(promises).then((results) => {
     console.log(`[+] Downloaded total of ${results.length} media files from r/${fnPage}`);
-    appendValues(urls, fnPage);
+    appendValues(fnPage, urls);
   }).catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
   });
