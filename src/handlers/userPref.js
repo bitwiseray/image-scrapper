@@ -1,5 +1,6 @@
 const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const jsonAfters = require('../afters.json');
 
 const fallback = {
   page: 'ecchi',
