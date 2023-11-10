@@ -17,7 +17,7 @@ checkFilesExistence()
   })
   .then((result) => sync(userQueue.page, userQueue.format))
   .catch((error) => {
-    console.log('\x1b[31m%s\x1b[0m', `[×] Something went wrong while trying to start:\n${error}`);
+    console.log('\x1b[31m%s\x1b[0m', `[×] Something went wrong while trying to start: ${error}`);
     process.exit(1);
   });
 
