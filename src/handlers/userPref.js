@@ -10,8 +10,8 @@ const fallback = {
 
 const userQueue = {
   page: null,
-  limit: NaN,
   sort: null,
+  limit: NaN,
   format: null
 };
 

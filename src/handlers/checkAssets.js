@@ -7,7 +7,7 @@ function checkFilesExistence() {
       const itemsToCheck = [path.join(__dirname, '../afters.json'), path.join(__dirname, '../global_url_logs.json')];
       itemsToCheck.forEach(item => {
         if (!fs.existsSync(item)) {
-          fs.writeFileSync(item, JSON.stringify([]));
+          fs.writeFileSync(item, JSON.stringify({}));
           console.log(`${item} created.`);
         }
       });
