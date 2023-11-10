@@ -36,13 +36,13 @@ function startWithConfig() {
       let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
       switch (sortCache.toLowerCase()) {
         case 'top':
-          userQueue.sort = 'sort=top?t=all';
+          userQueue.sort = '?t=all';
           break;
         case 'hot':
         case 'new':
         case 'rising':
         case 'controversial':
-          userQueue.sort = `sort=${sortCache}`;
+          userQueue.sort = `${sortCache}`;
           break;
         default:
           userQueue.sort = fallback.sort;
