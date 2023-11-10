@@ -42,10 +42,10 @@ function startWithConfig() {
         case 'new':
         case 'rising':
         case 'controversial':
-          userQueue.sort = `sort=${userQueue.sort.toLowerCase()}`;
+          userQueue.sort = `sort=${sortCache}`;
           break;
         default:
-          userQueue.sort = userQueue.fallback[0].sort;
+          userQueue.sort = fallback.sort;
       }
       userQueue.format = await ask('Enter media format (image, video, gif): ');
       userQueue.limit = await ask('Enter limit (default is 20): ');
