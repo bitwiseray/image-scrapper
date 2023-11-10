@@ -1,18 +1,20 @@
 const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-const fallback = { 
-  page: 'ecchi', 
-  limit: 20, 
-  sort: 'sort=top?t=all', 
-  format: 'image' 
+const fallback = {
+  page: 'ecchi',
+  limit: 20,
+  sort: 'sort=top?t=all',
+  format: 'image',
+  link: 'https://www.reddit.com/r/cats/hot/.json?limit=10'
 };
 
 const userQueue = {
   page: null,
   sort: null,
   limit: NaN,
-  format: null
+  format: null,
+  link: null
 };
 
 for (let [key, value] of Object.entries(userQueue)) {
@@ -36,13 +38,11 @@ function startWithConfig() {
       let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
       switch (sortCache.toLowerCase()) {
         case 'top':
-          userQueue.sort = '?t=all';
-          break;
         case 'hot':
         case 'new':
         case 'rising':
         case 'controversial':
-          userQueue.sort = `${sortCache}`;
+          userQueue.sort = sortCache;
           break;
         default:
           userQueue.sort = fallback.sort;
@@ -50,6 +50,24 @@ function startWithConfig() {
       userQueue.format = await ask('Enter media format (image, video, gif): ');
       userQueue.limit = await ask('Enter limit (default is 20): ');
       if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
+        let link;
+        switch (userQueue.sort) {
+          case 'top':
+            if (jsonAfters[fnPage]) {
+              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all&after=${jsonAfters[fnPage]}`;
+            } else {
+              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all`;
+            }
+            break;
+          default:
+            if (jsonAfters[fnPage]) {
+              link = `https://www.reddit.com/r/${userQueue.page}/${userQueue.sort}/.json?limit=${userQueue.limit}&after=${jsonAfters[userQueue.page]}`;
+            } else {
+              link = `https://www.reddit.com/r/${userQueue.page}/${userQueue.sort}/.json?limit=${userQueue.limit}`;
+            }
+            break;
+        }
+        userQueue.link = link;
         resolve({ check: true, mode: 'config', error: null });
       } else {
         console.log('Invalid input or missing page, default fallback configuration will be used.');
