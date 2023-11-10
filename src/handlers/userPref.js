@@ -54,14 +54,14 @@ function startWithConfig() {
         let link;
         switch (userQueue.sort) {
           case 'top':
-            if (jsonAfters[fnPage]) {
-              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all&after=${jsonAfters[fnPage]}`;
+            if (jsonAfters[userQueue.page]) {
+              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all&after=${jsonAfters[userQueue.page]}`;
             } else {
               link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all`;
             }
             break;
           default:
-            if (jsonAfters[fnPage]) {
+            if (jsonAfters[userQueue.page]) {
               link = `https://www.reddit.com/r/${userQueue.page}/${userQueue.sort}/.json?limit=${userQueue.limit}&after=${jsonAfters[userQueue.page]}`;
             } else {
               link = `https://www.reddit.com/r/${userQueue.page}/${userQueue.sort}/.json?limit=${userQueue.limit}`;

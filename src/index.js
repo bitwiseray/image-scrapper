@@ -25,7 +25,6 @@ async function sync(fnPage, fnFormat) {
   console.table(userQueue);
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = userQueue.url;
-  console.log(userQueue.url, [fnLimit, fnFormat])
   const resBody = await axios.get(getUrl);
   saveAfter(resBody.data.data.after, fnPage);
   if (!fs.existsSync(path.join(__dirname, 'output', fnPage))) {
@@ -45,7 +44,7 @@ async function sync(fnPage, fnFormat) {
       const args = ['-o', file, url];
       execFile('curl', args, (err, stdout, stderr) => {
         if (stderr) {
-          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${fnLimit}]`);
+          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename}`);
           urls.push(url)
         }
         if (err) {
