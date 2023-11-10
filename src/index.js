@@ -15,14 +15,14 @@ checkFilesExistence()
       throw new Error("File existence check failed.");
     }
   })
-  .then((result) => sync(...Object.values(userQueue)))
+  .then((result) => sync(userQueue.page, userQueue.format))
   .catch((error) => {
     console.log('\x1b[31m%s\x1b[0m', error);
     process.exit(1);
   });
 
-async function sync(fnPage, fnSort, fnLimit, fnFormat) {
-  console.log(...Object.values(userQueue))
+async function sync(fnPage, fnFormat) {
+  console.table(userQueue);
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
   let getUrl = userQueue.url;
   console.log(userQueue.url, [fnLimit, fnFormat])
