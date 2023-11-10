@@ -39,13 +39,13 @@ async function sync(fnPage, fnSort, fnLimit, fnFormat) {
   }
   let count = 0;
   let urls = [];
-  const download = (url, filename) => {
+  const download = (url, filename, pfCount) => {
     return new Promise((resolve, reject) => {
       const file = path.join(__dirname, 'output', fnPage, filename);
       const args = ['-o', file, url];
       execFile('curl', args, (err, stdout, stderr) => {
         if (stderr) {
-          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${count}/${fnLimit}]`);
+          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename} | [${pfCount}/${fnLimit}]`);
           urls.push(url)
         }
         if (err) {
@@ -67,7 +67,7 @@ async function sync(fnPage, fnSort, fnLimit, fnFormat) {
       const file = path.join(__dirname, 'output', fnPage, name);
       if (!fs.existsSync(file)) {
         if (count < 3) {
-          promises.push(download(url, name));
+          promises.push(download(url, name, count));
           count++;
         }
       }
