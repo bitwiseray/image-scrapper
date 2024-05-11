@@ -7,19 +7,22 @@ const { startWithConfig, userQueue } = require('./handlers/userPref.js');
 const { appendValues } = require('./handlers/createLogs.js');
 const { saveAfter } = require('./handlers/saveAfters.js');
 
-checkFilesExistence()
-  .then((result) => {
-    if (result.check) {
-      return startWithConfig();
+async function start() {
+  try {
+    let res = await checkFilesExistence();
+    if (res.check) {
+      await startWithConfig();
+      sync(userQueue.page, userQueue.format);
     } else {
       throw new Error("File existence check failed.");
     }
-  })
-  .then((result) => sync(userQueue.page, userQueue.format))
-  .catch((error) => {
-    console.log('\x1b[31m%s\x1b[0m', `[×] Something went wrong while trying to start: ${error}`);
+  } catch (error) {
+    console.log('\x1b[31m%s\x1b[0m', `[x] Something went wrong while trying to start: ${error}`);
     process.exit(1);
-  });
+  }
+}
+
+start();
 
 async function sync(fnPage, fnFormat) {
   console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
@@ -27,7 +30,7 @@ async function sync(fnPage, fnFormat) {
   const resBody = await axios.get(getUrl);
   saveAfter(resBody.data.data.after, fnPage);
   if (!fs.existsSync(path.join(__dirname, 'output', fnPage))) {
-    fs.mkdir(path.join(__dirname, 'output', fnPage), { recursive: true }, function(err) {
+    fs.mkdir(path.join(__dirname, 'output', fnPage), { recursive: true }, function (err) {
       if (err) {
         console.error(err);
       } else {
