@@ -1,5 +1,5 @@
-const { execFile } = require('child_process');
 const axios = require('axios');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { checkFilesExistence } = require('./handlers/checkAssets.js');
@@ -21,63 +21,95 @@ async function start() {
     process.exit(1);
   }
 }
-
 start();
 
-async function sync(fnPage, fnFormat) {
-  console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session.`);
-  let getUrl = userQueue.url;
-  const resBody = await axios.get(getUrl);
-  saveAfter(resBody.data.data.after, fnPage);
-  if (!fs.existsSync(path.join(__dirname, 'output', fnPage))) {
-    fs.mkdir(path.join(__dirname, 'output', fnPage), { recursive: true }, function (err) {
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('\x1b[33m%s\x1b[0m', `[!] Created a new folder within \`./output\` for a new page ${fnPage}`);
-      }
-    });
-  }
-  let count = 0;
-  let urls = [];
-  const download = (url, filename) => {
-    return new Promise((resolve, reject) => {
-      const file = path.join(__dirname, 'output', fnPage, filename);
-      const args = ['-o', file, url];
-      execFile('curl', args, (err, stdout, stderr) => {
-        if (stderr) {
-          console.log('\x1b[32m%s\x1b[0m', `[+] Downloaded ${filename}`);
-          urls.push(url)
-        }
-        if (err) {
-          console.log('\x1b[31m%s\x1b[0m', error);
-          reject(err);
-        } else {
-          resolve(filename);
-        }
-      });
-    });
-  };
+function download(url, filename, directory) {
+  const filePath = path.join(directory, filename);
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(filePath);
 
-  let promises = [];
+    https.get(url, response => {
+      if (response.statusCode !== 200) {
+        reject({ errorCode: 'DOWNLOAD_ERROR', message: `Failed to download ${filename} from \`${url}\`, response buffer was be corrupted or broken.` });
+        return;
+      }
+      let totalBytes = 0;
+      let downloadedBytes = 0;
+      const totalSize = parseInt(response.headers['content-length'], 10);
+      const progressBarLength = 40;
+      response.on('data', chunk => {
+        totalBytes += chunk.length;
+        downloadedBytes += chunk.length;
+        const progress = Math.round((downloadedBytes / totalSize) * 100);
+        const progressText = `[${'='.repeat(Math.round(progress / (100 / progressBarLength)))}${' '.repeat(progressBarLength - Math.round(progress / (100 / progressBarLength)))}] ${progress}% | ${(totalBytes / (1024 * 1024)).toFixed(2)} Mb`;
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
+        process.stdout.write(`Downloading ${filename}: ${progressText}`);
+      });
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(() => {
+          const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+          resolve({ errorCode: null, message: `Downloaded ${filename}, took ${totalMB} MB on local disk` });
+        });
+      });
+      file.on('error', err => {
+        fs.unlink(filePath, () => reject({ errorCode: 'DOWNLOAD_ERROR', message: `Failed to download ${filename}, buffer may be corrupted or broken.`, error: err }));
+      });
+    }).on('error', err => {
+      fs.unlink(filePath, () => reject({ errorCode: 'CANNOT_GET_STREAM', message: `Buffer for ${filename} does not exist, the online form was deleted or moved.`, error: err }));
+    });
+  });
+}
+
+async function sync(fnPage, fnFormat) {
+  console.log('\x1b[33m%s\x1b[0m', `[!] A logs file will be created of all urls scraped in this session, change this in settings.`);
+  let getUrl = userQueue.url;
+  const body = await axios.get(getUrl);
+  saveAfter(body.data.data.after, fnPage);
+  const directoryPath = path.join(__dirname, 'output', fnPage);
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+    console.log('\x1b[33m%s\x1b[0m', `[!] Created a new folder within \`./output\` for a new subreddit page ${fnPage}`);
+  }
   let mediaFound = false;
-  for (let index = 0; index < resBody.data.data.children.length; index++) {
-    if (resBody.data.data.children[index].data.post_hint == fnFormat) {
-      let url = resBody.data.data.children[index].data.url_overridden_by_dest;
-      let name = path.basename(url);
-      const file = path.join(__dirname, 'output', fnPage, name);
-      if (!fs.existsSync(file)) {
-        promises.push(download(url, name));
-        count++;
+  const promises = [];
+  const urls = [];
+  let cleared = [];
+  for (const child of body.data.data.children) {
+    if (child.data.post_hint === fnFormat) {
+      const url = child.data.url_overridden_by_dest;
+      const name = path.basename(url);
+      const filePath = path.join(directoryPath, name);
+      if (!fs.existsSync(filePath)) {
+        try {
+          const result = await download(url, name, directoryPath);
+          urls.push(url);
+          if (!result.message == null) console.log(`\n${result.message}`);
+          promises.push(Promise.resolve(result));
+        } catch (error) {
+          console.error(`\n${error.message}`);
+          promises.push(Promise.resolve(null));
+          fs.unlink(filePath, (err) => {
+            if (err) console.log(err)
+          });
+          cleared.push(name);
+        }
       }
       mediaFound = true;
     }
   }
-  if (!mediaFound) console.log('\x1b[31m%s\x1b[0m', '[•] No media format found in the provided subreddit link, cause may be that the provided subreddit is a text-only.');
-  Promise.all(promises).then((results) => {
-    console.log(`[+] Downloaded total of ${results.length} media files from r/${fnPage}`);
+  if (!mediaFound) {
+    console.log('\x1b[31m%s\x1b[0m', '[•] No media format found in the provided subreddit link, cause may be that the provided subreddit is a text-only, or there are no medias based on the custom format provided.');
+    return;
+  }
+  try {
+    const results = await Promise.all(promises);
+    const successfulDownloads = results.filter(result => result !== null);
     appendValues(fnPage, urls);
-  }).catch((error) => {
-    console.log('\x1b[31m%s\x1b[0m', error);
-  });
+    console.log('\x1b[32m%s\x1b[0m', `\n${successfulDownloads.length} files downloaded from r/${fnPage}, and cleared ${cleared.length} files with broken buffer.`);
+    process.exit(1);
+  } catch (err) {
+    console.error('\x1b[31m%s\x1b[0m', `\nError downloading files: ${err.message}`);
+  }
 }

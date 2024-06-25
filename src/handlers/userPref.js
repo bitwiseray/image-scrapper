@@ -6,7 +6,7 @@ const fallback = {
   limit: 10,
   sort: 'top',
   format: 'image',
-  link: 'https://www.reddit.com/r/cats/hot/.json?limit=10'
+  url: 'https://www.reddit.com/r/cats/hot/.json?limit=10'
 };
 
 const userQueue = {
@@ -17,9 +17,11 @@ const userQueue = {
   url: null
 };
 
-for (let [key, value] of Object.entries(userQueue)) {
-  if (value == null || value === "" || Number.isNaN(value)) {
-    userQueue[key] = fallback[key];
+function fillEmpty() {
+  for (const key in userQueue) {
+    if (userQueue[key] === null || userQueue[key] === '') {
+      userQueue[key] = fallback[key];
+    }
   }
 }
 
@@ -35,14 +37,16 @@ function startWithConfig() {
   const jsonAfters = require('../afters.json');
   return new Promise(async (resolve, reject) => {
     try {
-      userQueue.page = await ask('Enter subreddit page name (i.e: cats): ');
+      let page = await ask('Enter subreddit page name (i.e: cats): ');
+      while (!page || page.trim() === '') {
+        page = await ask('Subreddit page name cannot be empty, please enter a proper name: ');
+      }
+      userQueue.page = page;
       let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
       switch (sortCache.toLowerCase()) {
         case 'top':
         case 'hot':
         case 'new':
-        case 'rising':
-        case 'controversial':
           userQueue.sort = sortCache;
           break;
         default:
@@ -55,9 +59,9 @@ function startWithConfig() {
         switch (userQueue.sort) {
           case 'top':
             if (jsonAfters[userQueue.page]) {
-              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all&after=${jsonAfters[userQueue.page]}`;
+              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit < 0 ? 10 : userQueue.limit}&t=all&after=${jsonAfters[userQueue.page]}`;
             } else {
-              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit}&t=all`;
+              link = `https://www.reddit.com/r/${userQueue.page}/top/.json?limit=${userQueue.limit < 0 ? 10 : userQueue.limit}&t=all`;
             }
             break;
           default:
@@ -69,10 +73,10 @@ function startWithConfig() {
             break;
         }
         userQueue.url = link;
+        fillEmpty();
         resolve({ check: true, mode: 'config', error: null });
       } else {
-        console.log('Invalid input or missing page, default fallback configuration will be used.');
-        resolve({ check: true, mode: 'default', error: null });
+        resolve({ check: true, mode: 'default', error: null, messsage: 'Invalid input or missing page, default fallback configuration will be used.' });
       }
       rl.close();
     } catch (error) {
