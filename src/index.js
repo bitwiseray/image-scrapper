@@ -85,7 +85,7 @@ async function sync(fnPage, fnFormat) {
         try {
           const result = await download(url, name, directoryPath);
           urls.push(url);
-          if (!result.message == null) console.log(`\n${result.message}`);
+          if (result.message !== null) console.log(`\n${result.message}`);
           promises.push(Promise.resolve(result));
         } catch (error) {
           console.error(`\n${error.message}`);
