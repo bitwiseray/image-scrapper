@@ -4,7 +4,7 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const fallback = {
   page: 'cats',
   limit: 10,
-  sort: 'top',
+  sort: 'hot',
   format: 'image',
   url: 'https://www.reddit.com/r/cats/hot/.json?limit=10'
 };
@@ -38,8 +38,9 @@ function startWithConfig() {
   return new Promise(async (resolve, reject) => {
     try {
       let page = await ask('Enter subreddit page name (i.e: cats): ');
-      while (!page || page.trim() === '') {
-        page = await ask('Subreddit page name cannot be empty, please enter a proper name: ');
+      while (!page || !new RegExp(/^[A-Za-z0-9_]+$/).test(page)) {
+        console.log('\x1b[33m%s\x1b[0m', `[!] Invalid subreddit type, make sure you don't include the perfix \`r/\` or leave the prompt empty.`);
+        page = await ask('Enter subreddit page name (i.e: cats): ');
       }
       userQueue.page = page;
       let sortCache = await ask('Enter sorting option (hot, new, top, etc.): ');
@@ -52,7 +53,12 @@ function startWithConfig() {
         default:
           userQueue.sort = fallback.sort;
       }
-      userQueue.format = await ask('Enter media format (image, video, gif): ');
+      let typeAsk = await ask('Enter media format (image or gif): ');
+      while (typeAsk == 'video') {
+        console.log('\x1b[33m%s\x1b[0m', `[!] Due to scrapping limitations, video format scrapping is not supported yet.`);
+        typeAsk = await ask('Enter media format (image, gif): ');
+      }
+      userQueue.format = typeAsk;
       userQueue.limit = await ask('Enter limit (default is 20): ');
       if (typeof userQueue.page === 'string' && userQueue.page.trim() !== '') {
         let link;
