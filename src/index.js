@@ -54,7 +54,7 @@ function download(url, filename, directory) {
         });
       });
       file.on('error', err => {
-        fs.unlink(filePath, () => reject({ errorCode: 'DOWNLOAD_ERROR', message: `Failed to download ${filename}, buffer may be corrupted or broken.`, error: err }));
+        fs.unlink(filePath, () => reject({ errorCode: 'DOWNLOAD_ERROR', message: `Failed to download ${filename}, buffer may be corrupted or broken.\nFull error:\n${err}`, error: err }));
       });
     }).on('error', err => {
       fs.unlink(filePath, () => reject({ errorCode: 'CANNOT_GET_STREAM', message: `Buffer for ${filename} does not exist, the online form was deleted or moved.`, error: err }));
@@ -76,8 +76,14 @@ async function sync(fnPage, fnFormat) {
   const promises = [];
   const urls = [];
   let cleared = [];
+  let type = (postHint) => {
+      if (postHint && postHint.includes(':')) {
+        return postHint.split(':').pop();
+      }
+      return postHint;
+    }
   for (const child of body.data.data.children) {
-    if (child.data.post_hint === fnFormat) {
+    if (type(child.data.post_hint) === fnFormat) {
       const url = child.data.url_overridden_by_dest;
       const name = path.basename(url);
       const filePath = path.join(directoryPath, name);
