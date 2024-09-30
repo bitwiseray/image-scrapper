@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": ["scrapper"],
+  "keywords": [
+    "scrapper"
+  ],
   "author": "Ray",
   "license": "MIT",
   "dependencies": {
